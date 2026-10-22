@@ -12,6 +12,35 @@ TODAY = None
 debug = False
 cache = {}
 
+DAILY_FEE_BY_KIND = {"book": 0.5, "dvd": 1.0, "magazine": 0.2}
+DEFAULT_DAILY_FEE = 0.5
+DISCOUNT_BY_MEMBER_TYPE = {"student": 0.5, "premium": 1.0}
+
+def late_fee(days_late: int, kind: str, member_type: str, price: float) -> float:
+    """Pénalité de retard, réduite selon le membre et plafonnée au prix."""
+    # Aucun frais si le document est rendu à temps
+    if days_late <= 0:
+        return 0.0
+
+    # Les membres premium ne paient pas de pénalités
+    if member_type == "premium":
+        return 0.0
+
+    # Le tarif dépend du type de document
+    if kind == "dvd":
+        tarif = 1.0
+    else:
+        tarif = 0.5
+
+    frais = days_late * tarif
+
+    # Les étudiants bénéficient d'une réduction de 50%
+    if member_type == "student":
+        frais *= 0.5
+
+    # La pénalité ne dépasse jamais le prix du document
+    return round(min(frais, price), 2)
+
 
 class Library:
 
