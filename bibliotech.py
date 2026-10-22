@@ -256,24 +256,9 @@ class Library:
                     bk = self.find("b", x["book"])
                     mb = self.find("m", x["member"])
                     j = (get_today() - due).days
-                    if j > 0:
-                        if bk["kind"] == "book":
-                            pen = j * 0.5
-                        elif bk["kind"] == "dvd":
-                            pen = j * 1.0
-                        elif bk["kind"] == "magazine":
-                            pen = j * 0.2
-                        else:
-                            pen = j * 0.5
-                        if mb["type"] == "student":
-                            pen = pen * 0.5
-                        elif mb["type"] == "premium":
-                            pen = 0
-                        if pen > bk["price"]:
-                            pen = bk["price"]
-                    else:
-                        pen = 0
-                    a_payer = a_payer + round(pen, 2)
+                    # Calculer les pénalités avec la fonction commune
+                    pen = late_fee(j, bk["kind"], mb["type"], bk["price"])
+                    a_payer = a_payer + pen
             else:
                 encaisse = encaisse + x["fee"]
             if x["book"] in data2:
