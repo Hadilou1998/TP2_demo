@@ -11,6 +11,7 @@ from bibliotech import late_fee
         (10, "dvd", "student",14.99, 5.0),
         (10, "book", "premium",12.90, 0.0),
         (100, "book", "standard", 12.90,12.90),
+        (10, "cd", "standard", 9.99, 5.0),
     ]
 )
 
