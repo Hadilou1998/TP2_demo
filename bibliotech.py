@@ -208,26 +208,9 @@ class Library:
         bk = self.find("b", ln["book"])
         mb = self.find("m", ln["member"])
         t = get_today()
-        d = (t - datetime.strptime(ln["due"], "%Y-%m-%d").date()).days
-        if d > 0:
-            if bk["kind"] == "book":
-                f = d * 0.5
-            elif bk["kind"] == "dvd":
-                f = d * 1.0
-            elif bk["kind"] == "magazine":
-                f = d * 0.2
-            else:
-                f = d * 0.5
-            if mb["type"] == "student":
-                f = f * 0.5
-            elif mb["type"] == "premium":
-                f = 0
-            if f > bk["price"]:
-                f = bk["price"]
-        else:
-            f = 0
-            d = 0
-        f = round(f, 2)
+        # Un retour en avance ne doit pas afficher de retard négatif
+        d = max(0, (t - datetime.strptime(ln["due"], "%Y-%m-%d").date()).days)
+        f = late_fee(d, bk["kind"], mb["type"], bk["price"])
         ln["returned"] = str(t)
         ln["fee"] = f
         self.save()
