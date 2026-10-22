@@ -22,24 +22,14 @@ def late_fee(days_late: int, kind: str, member_type: str, price: float) -> float
     if days_late <= 0:
         return 0.0
 
-    # Les membres premium ne paient pas de pénalités
-    if member_type == "premium":
-        return 0.0
+    # Chaque type de document possède son propre tarif
+    fee = days_late * DAILY_FEE_BY_KIND.get(kind, DEFAULT_DAILY_FEE)
 
-    # Le tarif dépend du type de document
-    if kind == "dvd":
-        tarif = 1.0
-    else:
-        tarif = 0.5
-
-    frais = days_late * tarif
-
-    # Les étudiants bénéficient d'une réduction de 50%
-    if member_type == "student":
-        frais *= 0.5
+    # Appliquer la réduction selon le type de membre
+    fee *= 1 - DISCOUNT_BY_MEMBER_TYPE.get(member_type, 0.0)
 
     # La pénalité ne dépasse jamais le prix du document
-    return round(min(frais, price), 2)
+    return round(min(fee, price), 2)
 
 
 class Library:
@@ -232,25 +222,8 @@ class Library:
             book = self.find("b", x["book"])
             member = self.find("m", x["member"])
             nbj = (get_today() - datetime.strptime(x["due"], "%Y-%m-%d").date()).days
-            # calcul penalite
-            if nbj > 0:
-                if book["kind"] == "book":
-                    p = nbj * 0.5
-                elif book["kind"] == "dvd":
-                    p = nbj * 1.0
-                elif book["kind"] == "magazine":
-                    p = nbj * 0.2
-                else:
-                    p = nbj * 0.5
-                if member["type"] == "student":
-                    p = p * 0.5
-                elif member["type"] == "premium":
-                    p = 0
-                if p > book["price"]:
-                    p = book["price"]
-            else:
-                p = 0
-            p = round(p, 2)
+            # Utiliser la fonction commune pour calculer la pénalité
+            p = late_fee(nbj, book["kind"], member["type"], book["price"])
             total = total + p
             print(x["id"] + " | " + member["name"] + " | " + book["title"] + " | " + str(nbj) + " jour(s) | " + "%.2f" % p + " EUR")
             # envoi du mail
