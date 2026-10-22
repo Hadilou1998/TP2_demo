@@ -302,25 +302,11 @@ class Library:
             else:
                 end = get_today()
             dl = (end - datetime.strptime(x["due"], "%Y-%m-%d").date()).days
-            if dl > 0:
-                if bk["kind"] == "book":
-                    fee = dl * 0.5
-                elif bk["kind"] == "dvd":
-                    fee = dl * 1.0
-                elif bk["kind"] == "magazine":
-                    fee = dl * 0.2
-                else:
-                    fee = dl * 0.5
-                if mb["type"] == "student":
-                    fee = fee * 0.5
-                elif mb["type"] == "premium":
-                    fee = 0
-                if fee > bk["price"]:
-                    fee = bk["price"]
-            else:
-                fee = 0
-                dl = 0
-            fee = round(fee, 2)
+            # Un retour en avance ne compte pas comme un retard
+            dl = max(0, dl)
+
+            # Utiliser la fonction commune pour calculer la pénalité
+            fee = late_fee(dl, bk["kind"], mb["type"], bk["price"])
             f.write(x["id"] + sep + mb["name"] + sep + bk["title"] + sep + x["start"] + sep + x["due"] + sep + x["returned"] + sep + str(dl) + sep + "%.2f" % fee + "\n")
             n = n + 1
         f.close()
